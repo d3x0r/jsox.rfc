@@ -14,8 +14,8 @@ keyword:
  - data interchange
  - media type
 venue:
-  github: d3x0r/jsox.rfc
-  latest: https://d3x0r.github.io/jsox.rfc/draft-buckeyne-jsox-format.html
+  github: "d3x0r/jsox.rfc"
+  latest: "https://d3x0r.github.io/jsox.rfc/draft-buckeyne-jsox-format.html"
 
 author:
  -
