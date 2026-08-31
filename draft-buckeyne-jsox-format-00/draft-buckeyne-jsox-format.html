@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>The JavaScript Object eXchange (JSOX) Data Interchange Format</title>
+<meta content="James Buckeyne" name="author">
+<meta content='
+       JavaScript Object eXchange (JSOX) is a lightweight, text-based,
+language-independent data interchange format.  It is derived from JSON
+and from the object literal syntax of the ECMAScript Programming
+Language Standard.  Every well-formed JSON text is a well-formed JSOX
+text. 
+       JSOX extends JSON with unquoted identifiers, additional string quoting
+and escape forms, comments, additional number forms including dates and
+arbitrary-precision integers, binary typed arrays, user-defined types
+carried by a type tag, field-name macros that remove repeated keys from
+a document, and references that permit shared and cyclic structures to
+be encoded. 
+       This document defines the JSOX grammar and registers the media type
+"application/jsox". 
+    ' name="description">
+<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="JSON" name="keyword">
+<meta content="serialization" name="keyword">
+<meta content="data interchange" name="keyword">
+<meta content="media type" name="keyword">
+<meta content="draft-buckeyne-jsox-format-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.0
+    Python 3.14.7
+    ConfigArgParse 1.7.5
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.11.5
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.8.2
+-->
+<link href="draft-buckeyne-jsox-format.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">JSOX</td>
+<td class="right">August 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Buckeyne</td>
+<td class="center">Expires 4 March 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-buckeyne-jsox-format-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-08-31" class="published">31 August 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-03-04">4 March 2027</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">J. Buckeyne</div>
+<div class="org">Independent</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">The JavaScript Object eXchange (JSOX) Data Interchange Format</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">JavaScript Object eXchange (JSOX) is a lightweight, text-based,
+language-independent data interchange format.  It is derived from JSON
+and from the object literal syntax of the ECMAScript Programming
+Language Standard.  Every well-formed JSON text is a well-formed JSOX
+text.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">JSOX extends JSON with unquoted identifiers, additional string quoting
+and escape forms, comments, additional number forms including dates and
+arbitrary-precision integers, binary typed arrays, user-defined types
+carried by a type tag, field-name macros that remove repeated keys from
+a document, and references that permit shared and cyclic structures to
+be encoded.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">This document defines the JSOX grammar and registers the media type
+"application/jsox".<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://d3x0r.github.io/jsox.rfc/draft-buckeyne-jsox-format.html">https://d3x0r.github.io/jsox.rfc/draft-buckeyne-jsox-format.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-buckeyne-jsox-format/">https://datatracker.ietf.org/doc/draft-buckeyne-jsox-format/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/d3x0r/jsox.rfc">https://github.com/d3x0r/jsox.rfc</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 4 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-relationship-to-other-forma" class="internal xref">Relationship to Other Formats</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-jsox-grammar" class="internal xref">JSOX Grammar</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-whitespace-and-comments" class="internal xref">Whitespace and Comments</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-strings-identifiers-and-quo" class="internal xref">Strings, Identifiers, and Quoting</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-u00a0-in-an-unquoted-string" class="internal xref">U+00A0 in an Unquoted String</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-adjacent-values" class="internal xref">Adjacent Values</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-values" class="internal xref">Values</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-objects" class="internal xref">Objects</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-arrays" class="internal xref">Arrays</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-numbers" class="internal xref">Numbers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-arbitrary-precision-integer" class="internal xref">Arbitrary-Precision Integers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-dates" class="internal xref">Dates</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-quoted-strings" class="internal xref">Quoted Strings</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-typed-values" class="internal xref">Typed Values</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-typed-arrays-and-binary-dat" class="internal xref">Typed Arrays and Binary Data</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-references" class="internal xref">References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-macros" class="internal xref">Macros</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-string-and-character-issues" class="internal xref">String and Character Issues</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-character-encoding" class="internal xref">Character Encoding</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-unicode-characters" class="internal xref">Unicode Characters</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-string-comparison" class="internal xref">String Comparison</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-base-64-encoding" class="internal xref">Base 64 Encoding</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-parsers" class="internal xref">Parsers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
+                <p id="section-toc.1-1.12.2.1.1"><a href="#section-12.1" class="auto internal xref">12.1</a>.  <a href="#name-streams" class="internal xref">Streams</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-generators" class="internal xref">Generators</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#section-15" class="auto internal xref">15</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#section-16" class="auto internal xref">16</a>. <a href="#name-examples" class="internal xref">Examples</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
+            <p id="section-toc.1-1.17.1"><a href="#section-17" class="auto internal xref">17</a>. <a href="#name-references-2" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17.2.1">
+                <p id="section-toc.1-1.17.2.1.1"><a href="#section-17.1" class="auto internal xref">17.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17.2.2">
+                <p id="section-toc.1-1.17.2.2.1"><a href="#section-17.2" class="auto internal xref">17.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
+            <p id="section-toc.1-1.18.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-changes-from-json" class="internal xref">Changes from JSON</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.19">
+            <p id="section-toc.1-1.19.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.20">
+            <p id="section-toc.1-1.20.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">JavaScript Object eXchange (JSOX) is a text format for the
+serialization of structured data.  It is derived from JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>
+and from the object literal syntax of the ECMAScript Programming
+Language Standard <span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">A JSOX parser accepts every text that a JSON parser accepts, and
+assigns it the same meaning.  The converse does not hold: a JSOX
+generator can produce texts that a JSON parser will reject.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">JSOX's design goals were to extend JSON with features that improve
+clarity for human authors and reduce redundancy for machine-generated
+documents, while keeping JSON's original goals of being minimal,
+portable, and textual.  Specifically, JSOX adds:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-4.1">
+          <p id="section-1-4.1.1">representation of the ECMAScript <code>Date</code> and <code>BigInt</code> types without
+application-level conventions;<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.2">
+          <p id="section-1-4.2.1">representation of <code>ArrayBuffer</code> and the twelve <code>TypedArray</code> classes
+as base 64 data carried by a type tag;<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.3">
+          <p id="section-1-4.3.1">a type tag on objects, arrays, and strings, so that a receiver can
+revive application types directly;<a href="#section-1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.4">
+          <p id="section-1-4.4.1">field-name macros, which declare a set of field names once and then
+carry only values for each subsequent object of that shape;<a href="#section-1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.5">
+          <p id="section-1-4.5.1">references, which allow a value to name another value already present
+in the same text, so that shared and cyclic object graphs survive a
+round trip;<a href="#section-1-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.6">
+          <p id="section-1-4.6.1">comments, unquoted object keys, and the additional string and number
+forms of ECMAScript.<a href="#section-1-4.6.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-5">All of these features are optional.  A JSOX text that uses none of them
+is a JSON text.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">A JSOX value is a primitive type (string, number, boolean, date,
+arbitrary-precision integer, or binary array), a structured type
+(object or array), or one of the two placeholder values <code>null</code> and
+<code>undefined</code>.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">A string is a sequence of zero or more Unicode characters <span>[<a href="#UNICODE" class="cite xref">UNICODE</a>]</span>.
+Note that this citation references the latest version of Unicode rather
+than a specific release.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">Many strings do not need quotation marks, and JSOX lets those be
+written without them.  This is not a separate kind of token: an
+unquoted string is a string, and it may appear anywhere a string may
+appear.  It may be an object member name, a type tag, or a value in its
+own right, so <code>{a:b}</code> and <code>{"a":"b"}</code> denote the same object.  Where
+this document says "identifier", it means a string in a position where
+a name is expected; the rules for when quotes may be omitted are the
+same in every position, and are given in <a href="#identifiers" class="auto internal xref">Section 3.2</a>.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-9">An object is a collection of zero or more name/value pairs, where a
+name is a string.  An array is an ordered sequence of zero or more
+values.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<p id="section-1-10">The terms "object" and "array" come from the conventions of
+ECMAScript.  The term "class" is used in the general sense of a set of
+values that share a common structure and are distinguished from other
+values by that structure.<a href="#section-1-10" class="pilcrow">¶</a></p>
+<div id="relationship-to-other-formats">
+<section id="section-1.1">
+        <h3 id="name-relationship-to-other-forma">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-relationship-to-other-forma" class="section-name selfRef">Relationship to Other Formats</a>
+        </h3>
+<p id="section-1.1-1">JSOX is a superset of JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>.  It draws its relaxations of
+JSON's punctuation and its string, number, and comment syntax from
+JSON5 <span>[<a href="#JSON5" class="cite xref">JSON5</a>]</span> and JSON6 <span>[<a href="#JSON6" class="cite xref">JSON6</a>]</span>, and adds the type tags,
+macros, references, dates, arbitrary-precision integers, and binary
+arrays described in this document.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">I-JSON <span>[<a href="#RFC7493" class="cite xref">RFC7493</a>]</span> defines a restricted profile of JSON for maximum
+interoperability.  JSOX moves in the opposite direction, and a JSOX
+text that uses any JSOX-specific construct is not an I-JSON message.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">A reference implementation is available at <span>[<a href="#JSOX-IMPL" class="cite xref">JSOX-IMPL</a>]</span>.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">The grammatical rules in this document are to be interpreted as
+described in ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span>, with the extension that numeric values
+above %xFF denote Unicode scalar values rather than octets, as is done
+in <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">Angle-bracketed prose values are used where a rule is more clearly
+stated in English than in ABNF.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">The grammar describes the text after comments have been removed
+(<a href="#ws" class="auto internal xref">Section 3.1</a>).  Comments are therefore absent from every rule below,
+including <code>ws</code>, and a comment may appear at any point that is not
+inside a quoted string.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">The number rules of <a href="#numbers" class="auto internal xref">Section 7</a> are the one place where the ABNF is
+deliberately looser than the language.  A number is recognized by a
+closed set of characters, and several of its forms -- dates in
+particular -- are then constrained by prose and by the references
+rather than by the grammar.  Where the two disagree, the prose governs.<a href="#section-2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="jsox-grammar">
+<section id="section-3">
+      <h2 id="name-jsox-grammar">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-jsox-grammar" class="section-name selfRef">JSOX Grammar</a>
+      </h2>
+<p id="section-3-1">A JSOX text is a sequence of tokens.  The set of tokens includes six
+structural characters, identifiers, strings, numbers, and six literal
+names.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">A JSOX text is a single serialized value, optionally preceded by one or
+more macro definitions (<a href="#macros" class="auto internal xref">Section 9.3</a>).<a href="#section-3-2" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3-3">
+<pre>
+JSOX-text = ws *( macro-definition ws ) value ws
+</pre><a href="#section-3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3-4">These are the six structural characters:<a href="#section-3-4" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3-5">
+<pre>
+begin-array     = ws %x5B ws  ; [ left square bracket
+begin-object    = ws %x7B ws  ; { left curly bracket
+end-array       = ws %x5D ws  ; ] right square bracket
+end-object      = ws %x7D ws  ; } right curly bracket
+name-separator  = ws %x3A ws  ; : colon
+value-separator = ws %x2C ws  ; , comma
+</pre><a href="#section-3-5" class="pilcrow">¶</a>
+</div>
+<p id="section-3-6">Two additional rules are used in the places where a structural
+character <span class="bcp14">MUST NOT</span> be preceded by whitespace: after the tag of a macro
+definition (<a href="#macros" class="auto internal xref">Section 9.3</a>), and after the tag of a typed value at the top
+level (<a href="#typed" class="auto internal xref">Section 9</a>).<a href="#section-3-6" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3-7">
+<pre>
+open-object     = %x7B ws     ; { with no preceding whitespace
+open-array      = %x5B ws     ; [ with no preceding whitespace
+</pre><a href="#section-3-7" class="pilcrow">¶</a>
+</div>
+<div id="ws">
+<section id="section-3.1">
+        <h3 id="name-whitespace-and-comments">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-whitespace-and-comments" class="section-name selfRef">Whitespace and Comments</a>
+        </h3>
+<p id="section-3.1-1">Insignificant whitespace is allowed before or after any of the six
+structural characters.  A whitespace character explicitly ends the
+preceding token; the next non-whitespace character begins a new token.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">All whitespace is optional except where it is needed to separate two
+tokens that would otherwise be read as one.  For example, the text
+<code>1 2 3</code> is three numbers and requires the separating whitespace, while
+<code>[1,2,3]</code> does not.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3.1-3">
+<pre>
+ws = *(
+        %x09 /              ; Horizontal tab
+        %x0A /              ; Line feed or New line
+        %x0D /              ; Carriage return
+        %x20 /              ; Space
+        %x2028 /            ; U+2028 Line separator
+        %x2029 /            ; U+2029 Paragraph separator
+        %xFEFF )            ; U+FEFF Zero width no-break space
+</pre><a href="#section-3.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1-4">Note that U+00A0 NO-BREAK SPACE is deliberately not whitespace in
+JSOX.  Its purpose in text is to join words that must not be separated,
+and JSOX preserves that meaning rather than overriding it.  U+00A0 is therefore an ordinary
+string character with one exception, in numbers; see <a href="#nbsp" class="auto internal xref">Section 3.2.1</a>.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.1-5">U+FEFF is treated as whitespace wherever it occurs, which has the
+effect that a byte order mark at the start of a text is ignored; see
+<a href="#encoding" class="auto internal xref">Section 10.1</a>.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.1-6">Comments are removed from the character stream before it is divided
+into tokens; they are not whitespace, and they are not values.  Two
+forms are defined:<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3.1-7">
+<pre>
+comment       = line-comment / block-comment
+
+line-comment  = ( %x2F.2F / %x23 )
+                *( %x00-09 / %x0B-0C / %x0E-2027 /
+                   %x202A-10FFFF )
+                ; "//" or "#" up to but not including the next
+                ; %x0A, %x0D, %x2028 or %x2029
+
+block-comment = %x2F.2A &lt;any sequence of characters that does not
+                contain the two-character sequence "*/"&gt; %x2A.2F
+                ; "/*" ... "*/"
+</pre><a href="#section-3.1-7" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1-8">A line comment is terminated by any of the four line terminators of
+<span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>: U+000A LINE FEED, U+000D CARRIAGE RETURN, U+2028 LINE
+SEPARATOR, and U+2029 PARAGRAPH SEPARATOR.  A line comment <span class="bcp14">MUST NOT</span> be treated as
+continuing past any of them.  The terminator is not part of the
+comment, so it remains in the stream as whitespace once the comment
+has been removed.<a href="#section-3.1-8" class="pilcrow">¶</a></p>
+<p id="section-3.1-9">A line comment that is not terminated before the end of the text is an
+error.  A block comment that is not closed before the end of the text
+is likewise an error.<a href="#section-3.1-9" class="pilcrow">¶</a></p>
+<p id="section-3.1-10">A comment is recognized only outside a quoted string.  Inside one there
+is no comment: <code>//</code>, <code>/*</code>, <code>*/</code>, and <code>#</code> are
+ordinary characters and are part of the string's value.  The text
+<code>"blah /* whatever */ "</code> is a single string of twenty characters,
+and because a string may span lines (<a href="#strings" class="auto internal xref">Section 8</a>), the same is true of
+comment delimiters that appear on a later line of a multi-line string.<a href="#section-3.1-10" class="pilcrow">¶</a></p>
+<p id="section-3.1-11">Because a comment is removed rather than replaced by a separator, a
+comment does not divide the text around it.  <code>[ab/*x*/cd]</code> is the
+single string <code>abcd</code>, and <code>[tr/*c*/ue]</code> is the boolean <code>true</code>, exactly
+as if the comment had not been written.<a href="#section-3.1-11" class="pilcrow">¶</a></p>
+<p id="section-3.1-12">Numbers are the exception, and not because of the comment.  A number
+is a whitelist: it is made only of the characters given in
+<a href="#numbers" class="auto internal xref">Section 7</a>, all of which are below U+0080.  <code>/</code> is not among them, so
+a number ends at the <code>/</code> that opens the comment, and the digits after
+the comment begin a second number.  <code>0.123/*or*/456</code> is therefore two
+numbers and never <code>0.123456</code>, and inside an array it is the adjacency
+error of <a href="#adjacency" class="auto internal xref">Section 3.2.2</a>.  An unquoted string is the opposite kind of
+rule -- anything not excluded -- which is why its two halves rejoin
+and a number's do not.<a href="#section-3.1-12" class="pilcrow">¶</a></p>
+<p id="section-3.1-13">Because <code>#</code> always introduces a comment, a generator <span class="bcp14">MUST</span> quote any
+string containing one.  <code>/</code> introduces a comment only as <code>//</code> or <code>/*</code>,
+so a generator <span class="bcp14">MUST</span> quote a string in which a <code>/</code> is followed by <code>/</code>
+or <code>*</code>, and need not quote one otherwise; see <a href="#identifiers" class="auto internal xref">Section 3.2</a>.<a href="#section-3.1-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="identifiers">
+<section id="section-3.2">
+        <h3 id="name-strings-identifiers-and-quo">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-strings-identifiers-and-quo" class="section-name selfRef">Strings, Identifiers, and Quoting</a>
+        </h3>
+<p id="section-3.2-1">A string may be written with or without quotation marks.  A string
+written without them is called an unquoted string, and the ABNF rule
+<code>unquoted-string</code> below describes which strings may be written that
+way.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">There is no separate identifier type.  Wherever this document writes
+<code>identifier</code> -- for an object member name (<a href="#objects" class="auto internal xref">Section 5</a>) or a type tag
+(<a href="#typed" class="auto internal xref">Section 9</a>) -- the token is a string, and it may be written quoted or
+unquoted under exactly the rules given here.  The word "identifier" is
+retained only because it reads more naturally in those positions.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-3.2-3">
+<pre>
+string          = quoted-string / unquoted-string
+
+identifier      = string
+
+unquoted-string = id-begin *id-char
+
+id-begin = &lt;any id-char that is not DIGIT, "+", "-", or "."&gt;
+
+id-char  = &lt;any Unicode scalar value that is not matched by ws, is
+            not a structural character, is not a quotation-mark,
+            and is not "#"; and "/" only where the character that
+            follows it is neither "/" nor "*"&gt;
+</pre><a href="#section-3.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2-4"><code>.</code> is excluded from <code>id-begin</code> but not from <code>id-char</code>, so it may
+appear anywhere in an unquoted string except at the start.
+<code>this.is.a.test</code> and <code>M.C.Fields</code> are each a single unquoted string,
+while <code>.5</code> is a number (<a href="#numbers" class="auto internal xref">Section 7</a>).  The same holds for a member
+name: <code>{this.is.a.test:1}</code> needs no quotes.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-5"><code>#</code> is excluded everywhere, because it always introduces a comment
+(<a href="#ws" class="auto internal xref">Section 3.1</a>).  <code>/</code> introduces one only as <code>//</code> or <code>/*</code>, so a solitary
+solidus is an ordinary character and needs no quotes:
+<code>www.example.com/file.name</code> is one unquoted string.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">A <code>/</code> that is followed by <code>/</code> or <code>*</code> opens a comment and so ends the
+string, which is why a URL carrying a scheme still <span class="bcp14">MUST</span> be quoted:
+in <code>"http://example.com"</code> the <code>//</code> would open a comment, and the <code>:</code>
+is a structural character in any case.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2-7">Nothing else is reserved.  A reverse solidus, for instance, is an
+ordinary <code>id-char</code>, so <code>\</code> on its own is a valid unquoted string; it
+carries no escape meaning outside a quoted string (<a href="#strings" class="auto internal xref">Section 8</a>).<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<p id="section-3.2-8"><code>quoted-string</code> is defined in <a href="#strings" class="auto internal xref">Section 8</a>.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
+<p id="section-3.2-9">Note that an unquoted string is a value in its own right, not only a
+member name.  In <code>{a:b}</code> both <code>a</code> and <code>b</code> are strings, and the object
+is the same one denoted by the JSON text <code>{"a":"b"}</code>.  Likewise
+<code>[abc]</code> is an array of one string, and a JSOX text consisting of the
+single token <code>hello</code> is a string.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<p id="section-3.2-10">A token that matches one of the six literal names (<a href="#values" class="auto internal xref">Section 4</a>) is that
+literal and not a string.  To write one of those words as a string, it
+<span class="bcp14">MUST</span> be quoted: <code>true</code> is the boolean, and <code>"true"</code> is the string.
+Similarly, a token that begins with a digit, <code>+</code>, <code>-</code>, or <code>.</code> is a
+number, which is why <code>id-begin</code> excludes those characters.<a href="#section-3.2-10" class="pilcrow">¶</a></p>
+<p id="section-3.2-11">Quotes are <span class="bcp14">OPTIONAL</span> around a string that matches <code>unquoted-string</code>.
+Generators <span class="bcp14">MUST</span> quote any string that does not.<a href="#section-3.2-11" class="pilcrow">¶</a></p>
+<p id="section-3.2-12">Generators <span class="bcp14">SHOULD</span> additionally quote a string that:<a href="#section-3.2-12" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-13.1">
+            <p id="section-3.2-13.1.1">is one of the literal names <code>true</code>, <code>false</code>, <code>null</code>, <code>NaN</code>,
+<code>Infinity</code>, or <code>undefined</code> -- here quoting is <span class="bcp14">REQUIRED</span>, per the
+paragraph above; or<a href="#section-3.2-13.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-13.2">
+            <p id="section-3.2-13.2.1">contains any of the characters matched by the regular expression
+<code>/[\n\r\t {}()&lt;&gt;!+*/.:,-]/</code>.<a href="#section-3.2-13.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.2-14">These characters are not all reserved by this document, but quoting
+them avoids ambiguity with syntax that a future revision may define.
+One of them, <code>#</code>, is not merely advisory: it is not an <code>id-char</code> at
+all, so the <span class="bcp14">MUST</span> above already requires quoting any string containing
+one.  A <code>/</code> is required to be quoted only where it is followed by <code>/</code>
+or <code>*</code>; elsewhere quoting it is the advice of this list, not a rule.<a href="#section-3.2-14" class="pilcrow">¶</a></p>
+<div id="nbsp">
+<section id="section-3.2.1">
+          <h4 id="name-u00a0-in-an-unquoted-string">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-u00a0-in-an-unquoted-string" class="section-name selfRef">U+00A0 in an Unquoted String</a>
+          </h4>
+<p id="section-3.2.1-1">U+00A0 NO-BREAK SPACE is an ordinary <code>id-char</code>, and this is deliberate.
+Its purpose in text is to join words that must not be separated, and
+JSOX preserves that meaning rather than overriding it: <code>th&lt;NBSP&gt;ng</code> is
+one string of five characters, not two strings.  Once a token is known
+to be a string, U+00A0 is collected into it like any other character.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">A generator is NOT <span class="bcp14">REQUIRED</span> to quote a string containing U+00A0, and
+the reference implementation <span>[<a href="#JSOX-IMPL" class="cite xref">JSOX-IMPL</a>]</span> does not.  Because U+00A0 is
+an <code>id-char</code>, such a string round-trips unquoted without ambiguity.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-3">The consequence for a leading U+00A0 follows from the same rule.  It is
+an <code>id-begin</code> character, so it starts a string: <code>&lt;NBSP&gt;thing</code> is one
+six-character string, while <code>&lt;NBSP&gt; thing</code> is two strings, the first of
+which is one character long, because the space between them is
+whitespace and U+00A0 is not.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-4">U+00A0 does, however, terminate a number (<a href="#numbers" class="auto internal xref">Section 7</a>).  Numbers have
+their own non-breaking separator, <code>_</code>, and a number's characters are
+all below U+0080.<a href="#section-3.2.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="adjacency">
+<section id="section-3.2.2">
+          <h4 id="name-adjacent-values">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-adjacent-values" class="section-name selfRef">Adjacent Values</a>
+          </h4>
+<p id="section-3.2.2-1">Whether two adjacent values may appear without a separator depends on
+whether the surrounding context bounds them.<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-2">The interior of an object or an array is a <em>bounded</em> context: the
+closing <code>}</code> or <code>]</code> and the <code>,</code> and <code>:</code> separators mark where each value
+ends, so no token is ambiguous.  The top level of a text is
+<em>unbounded</em>: nothing follows a complete value except, in a stream
+(<a href="#streams" class="auto internal xref">Section 12.1</a>), the next value.<a href="#section-3.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-3">In a bounded context, two adjacent values with only whitespace between
+them are a typed value if the first is a string, and an error
+otherwise.  <code>[ab cd]</code> is the string <code>cd</code> tagged <code>ab</code> (<a href="#typed" class="auto internal xref">Section 9</a>), while
+<code>[1 2]</code> is an error, since a number is never a tag.<a href="#section-3.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-4">In an unbounded context, a complete value ends there.  <code>"abc" {a:1}</code> at
+the top level is two values, not one tagged value; in a single-value
+text the second is extra data, and in a stream it is the next item.<a href="#section-3.2.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="values">
+<section id="section-4">
+      <h2 id="name-values">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-values" class="section-name selfRef">Values</a>
+      </h2>
+<p id="section-4-1">A JSOX value <span class="bcp14">MUST</span> be an object, an array, a number, a string, a typed
+value, or one of the following six literal names:<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4-2">
+<pre>
+false null true Infinity NaN undefined
+</pre><a href="#section-4-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4-3">The literal names <span class="bcp14">MUST</span> be lowercase except as spelled here, and <span class="bcp14">MUST</span>
+match exactly.  No other literal names are allowed.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-4-4">
+<pre>
+value = false / null / true / undefined / NaN / Infinity
+      / number / string / object / array / typed-value
+
+false     = %x66.61.6c.73.65             ; false
+null      = %x6e.75.6c.6c                ; null
+true      = %x74.72.75.65                ; true
+undefined = %x75.6e.64.65.66.69.6e.65.64 ; undefined
+NaN       = [ minus / plus ] %x4e.61.4e  ; [-]NaN
+Infinity  = [ minus / plus ]
+            %x49.6e.66.69.6e.69.74.79    ; [-]Infinity
+</pre><a href="#section-4-4" class="pilcrow">¶</a>
+</div>
+<p id="section-4-5">The alternatives of <code>value</code> are ordered: a token is tested against the
+six literal names first, then as a number, and only then as a string.
+Because <code>string</code> includes <code>unquoted-string</code> (<a href="#identifiers" class="auto internal xref">Section 3.2</a>), a bare
+word such as <code>hello</code> is a value -- a string -- and not an error.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6"><code>-NaN</code> and <code>+NaN</code> are accepted and denote the same value as <code>NaN</code>.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7"><code>undefined</code> denotes the absence of a value.  A member whose value is
+<code>undefined</code> is equivalent to a member that is not present, and a
+generator <span class="bcp14">MAY</span> omit such a member.  Receivers that have no
+representation for <code>undefined</code> <span class="bcp14">SHOULD</span> treat it as <code>null</code>.<a href="#section-4-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="objects">
+<section id="section-5">
+      <h2 id="name-objects">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-objects" class="section-name selfRef">Objects</a>
+      </h2>
+<p id="section-5-1">An object structure is represented as a pair of curly brackets
+surrounding zero or more name/value pairs (or members).  A name is an
+identifier.  A single colon comes after each name, separating the name
+from the value.  A single comma separates a value from a following
+name.  The names within an object <span class="bcp14">SHOULD</span> be unique.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-5-2">
+<pre>
+object = begin-object
+         [ member *( value-separator member )
+           [ value-separator ] ]
+         end-object
+
+member = identifier name-separator value
+</pre><a href="#section-5-2" class="pilcrow">¶</a>
+</div>
+<p id="section-5-3">A single trailing comma is permitted after the last member and has no
+effect.  More than one consecutive comma between members is an error.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">An object whose names are all unique is interoperable in the sense that
+all software implementations receiving that object will agree on the
+name-value mappings.  When the names within an object are not unique,
+the behavior of software that receives such an object is unpredictable.
+Many implementations report the last name/value pair only.  Other
+implementations report an error or fail to parse the object, and some
+implementations report all of the name/value pairs, including
+duplicates.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">JSOX parsing libraries <span class="bcp14">MAY</span> differ as to whether or not they make the
+ordering of object members visible to calling software.
+Implementations whose behavior does not depend on member ordering will
+be interoperable in the sense that they will not be affected by these
+differences.<a href="#section-5-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="arrays">
+<section id="section-6">
+      <h2 id="name-arrays">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-arrays" class="section-name selfRef">Arrays</a>
+      </h2>
+<p id="section-6-1">An array structure is represented as square brackets surrounding zero
+or more values (or elements).  Elements are separated by commas.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-6-2">
+<pre>
+array   = begin-array
+          [ element *( value-separator element ) ]
+          end-array
+
+element = ws [ value ] ws
+</pre><a href="#section-6-2" class="pilcrow">¶</a>
+</div>
+<p id="section-6-3">There is no requirement that the values in an array be of the same
+type.<a href="#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-4">An element <span class="bcp14">MAY</span> be empty, in which case the array has a member at that
+position whose value is <code>undefined</code>.  Consecutive commas therefore
+produce elisions: <code>[1,,3]</code> is an array of three elements whose second
+element is <code>undefined</code>.  A single trailing comma does not add an
+element; <code>[1,2,]</code> and <code>[1,2]</code> denote the same array, while <code>[1,2,,]</code>
+denotes an array of three elements.<a href="#section-6-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="numbers">
+<section id="section-7">
+      <h2 id="name-numbers">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-numbers" class="section-name selfRef">Numbers</a>
+      </h2>
+<p id="section-7-1">The representation of numbers is similar to that used in most
+programming languages, and follows <span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>.  A number is
+represented in base 10 unless a radix prefix selects another base.  It
+contains an integer component that may be prefixed with an optional
+sign, which may be followed by a fraction part and/or an exponent part.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">Four further forms are recognized that JSON does not have: radix
+numbers, arbitrary-precision integers, dates (<a href="#dates" class="auto internal xref">Section 7.2</a>), and the
+non-finite literals <code>NaN</code> and <code>Infinity</code> (<a href="#values" class="auto internal xref">Section 4</a>).<a href="#section-7-2" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-7-3">
+<pre>
+number        = plain-number / radix-number / bigint / date
+
+plain-number  = [ sign ] ( int [ frac ] / frac ) [ exp ]
+
+radix-number  = [ sign ] zero radix 1*radix-digit
+
+bigint        = [ sign ] int bigint-suffix
+
+sign          = plus / minus
+
+int           = DIGIT *DIGIT
+
+frac          = decimal-point *DIGIT
+
+exp           = e [ sign ] 1*DIGIT
+
+decimal-point = %x2E                ; .
+
+e             = %x65 / %x45         ; e E
+
+minus         = %x2D                ; -
+
+plus          = %x2B                ; +
+
+zero          = %x30                ; 0
+
+radix         = %x58 / %x78         ; X x  -- hexadecimal
+              / %x4F / %x6F         ; O o  -- octal
+              / %x42 / %x62         ; B b  -- binary
+
+radix-digit   = DIGIT / %x41-46 / %x61-66
+                ; restricted to the digits of the selected radix
+
+bigint-suffix = %x6E                ; n
+
+underscore    = %x5F                ; _
+</pre><a href="#section-7-3" class="pilcrow">¶</a>
+</div>
+<p id="section-7-4">A number begins with a digit, <code>+</code>, <code>-</code>, or <code>.</code>.  Once a number has
+started, only the characters named by the rules above may follow, and
+all of them are below U+0080.<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">A fraction part is a decimal point followed by zero or more digits, so
+both a leading and a trailing decimal point are permitted: <code>.5</code> and
+<code>1.</code> are valid numbers denoting 0.5 and 1.<a href="#section-7-5" class="pilcrow">¶</a></p>
+<p id="section-7-6">An exponent part begins with the letter E in upper or lower case, which
+may be followed by a plus or minus sign.  The E and optional sign are
+followed by one or more digits.<a href="#section-7-6" class="pilcrow">¶</a></p>
+<p id="section-7-7">Unlike JSON, leading zeros are permitted in a decimal number and do not
+change its value: <code>0123</code> denotes 123.  A base other than 10 <span class="bcp14">MUST</span> be
+selected with an explicit radix prefix.<a href="#section-7-7" class="pilcrow">¶</a></p>
+<p id="section-7-8">Earlier descriptions of JSOX followed C in reading a leading zero as
+selecting octal, so that <code>0123</code> denoted 83.  That reading is
+deprecated.  Implementations <span class="bcp14">MUST NOT</span> interpret a leading zero as
+selecting octal, and <span class="bcp14">MUST</span> use the <code>0o</code> prefix to write an octal
+number.  Generators <span class="bcp14">SHOULD</span> avoid emitting a leading zero at all, since
+a reader familiar with C may misread it.<a href="#section-7-8" class="pilcrow">¶</a></p>
+<p id="section-7-9">Only one sign may appear, and it <span class="bcp14">MUST</span> be the first character.  A
+sequence such as <code>----123</code> is an error.<a href="#section-7-9" class="pilcrow">¶</a></p>
+<p id="section-7-10">An underscore (<code>_</code>) <span class="bcp14">MAY</span> appear anywhere within a number, including
+before or after the decimal point and at the end.  It is treated as a
+zero-width separator: it is not stored and does not modify the value.
+<code>1_000_000</code> and <code>1000000</code> denote the same number.  Note that a leading
+underscore does not begin a number; it begins a string.<a href="#section-7-10" class="pilcrow">¶</a></p>
+<p id="section-7-11"><code>_</code> is the only non-breaking separator a number has.  U+00A0 NO-BREAK
+SPACE, which joins characters into a single string elsewhere
+(<a href="#nbsp" class="auto internal xref">Section 3.2.1</a>), terminates a number instead: every character of a number is
+below U+0080, so U+00A0 cannot be part of one.  <code>1234&lt;NBSP&gt;</code> is the
+number 1234, and <code>12&lt;NBSP&gt;34</code> is two numbers -- allowed at the top
+level of a stream, and an error in a bounded context (<a href="#adjacency" class="auto internal xref">Section 3.2.2</a>).<a href="#section-7-11" class="pilcrow">¶</a></p>
+<p id="section-7-12">This specification allows implementations to set limits on the range
+and precision of numbers accepted.  Since software that implements IEEE
+754 binary64 (double precision) numbers <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> is generally
+available and widely used, good interoperability can be achieved by
+implementations that expect no more precision or range than these
+provide, in the sense that implementations will approximate JSOX
+numbers within the expected precision.  A JSOX number such as <code>1E400</code>
+or <code>3.141592653589793238462643383279</code> may indicate potential
+interoperability problems, since it suggests that the software that
+created it expects receiving software to have greater capabilities for
+numeric magnitude and precision than is widely available.<a href="#section-7-12" class="pilcrow">¶</a></p>
+<p id="section-7-13">Note that when such software is used, numbers that are integers and are
+in the range <code>[-(2**53)+1, (2**53)-1]</code> are interoperable in the
+sense that implementations will agree exactly on their numeric values.<a href="#section-7-13" class="pilcrow">¶</a></p>
+<div id="arbitrary-precision-integers">
+<section id="section-7.1">
+        <h3 id="name-arbitrary-precision-integer">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-arbitrary-precision-integer" class="section-name selfRef">Arbitrary-Precision Integers</a>
+        </h3>
+<p id="section-7.1-1">An integer suffixed with <code>n</code> is an arbitrary-precision integer,
+corresponding to the ECMAScript BigInt type <span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>.  Its value is
+exact and is not subject to the binary64 range and precision
+considerations above.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">A receiver that has no arbitrary-precision integer type <span class="bcp14">SHOULD</span> report
+an error rather than silently approximating the value, unless the
+application has determined that approximation is acceptable.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">The suffix <span class="bcp14">MUST NOT</span> be combined with a fraction part or an exponent
+part.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dates">
+<section id="section-7.2">
+        <h3 id="name-dates">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-dates" class="section-name selfRef">Dates</a>
+        </h3>
+<p id="section-7.2-1">A number that contains one of the characters <code>T</code>, <code>Z</code>, or <code>:</code>, or that
+contains <code>+</code> or <code>-</code> in a position other than the leading sign, is a
+date rather than an ordinary number.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-7.2-2">
+<pre>
+date        = [ sign ] 1*DIGIT time-symbol
+              *( DIGIT / time-symbol )
+
+time-symbol = %x54 / %x5A           ; T Z
+            / %x2B / %x2D / %x3A    ; + - :
+</pre><a href="#section-7.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7.2-3">The value of a date is determined by interpreting its characters as an
+ISO 8601 <span>[<a href="#ISO8601" class="cite xref">ISO8601</a>]</span> date and time, as profiled by the Date Time String
+Format of <span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>.  A date is written without quotation marks.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2-4">Generators <span class="bcp14">SHOULD</span> emit a date that carries as much of the original
+timestamp as is available, including the local time zone offset, so
+that a receiver can recover it.  A date that is not a valid ISO 8601
+date and time is an error; implementations that follow <span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>
+will produce an "Invalid Date" value for it.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-5">The lexical rule above is deliberately permissive; it identifies which
+token is a date, and <span>[<a href="#ISO8601" class="cite xref">ISO8601</a>]</span> determines whether that token is
+valid.  Generators <span class="bcp14">MUST NOT</span> rely on any interpretation outside
+<span>[<a href="#ISO8601" class="cite xref">ISO8601</a>]</span>.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="strings">
+<section id="section-8">
+      <h2 id="name-quoted-strings">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-quoted-strings" class="section-name selfRef">Quoted Strings</a>
+      </h2>
+<p id="section-8-1">This section defines the quoted form of a string.  The unquoted form,
+and the relationship between the two, are defined in
+<a href="#identifiers" class="auto internal xref">Section 3.2</a>.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The representation of quoted strings follows the conventions of
+<span>[<a href="#ECMA-262" class="cite xref">ECMA-262</a>]</span>.  A quoted string begins and ends with a quotation mark.
+Three quotation marks are available: U+0022 QUOTATION MARK, U+0027
+APOSTROPHE, and U+0060 GRAVE ACCENT.  The closing quotation mark <span class="bcp14">MUST</span> be the same character as
+the opening quotation mark.  No template substitution is performed
+inside a grave-accent-quoted string; the grave accent is a third
+quotation mark and nothing more.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">All Unicode characters may be placed within the quotation marks, except
+for the quotation mark used to open the string and the reverse solidus,
+which <span class="bcp14">MUST</span> be escaped.  The other two quotation marks need not be
+escaped.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-4">A string <span class="bcp14">MAY</span> span more than one line.  Every character between the
+opening and the closing quotation mark is retained, including line
+terminators.  To continue a string onto the next line without including
+the line terminator in its value, escape the line terminator with a
+reverse solidus.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-8-5">
+<pre>
+quoted-string   = quotation-mark *char quotation-mark
+                  ; the closing mark is the same character as
+                  ; the opening mark
+
+quotation-mark  = %x22 / %x27 / %x60   ; " ' `
+
+char            = unescaped / escape escape-sequence
+
+escape          = %x5C                 ; \
+
+escape-sequence = %x22 /               ; "  quotation mark
+                  %x27 /               ; '  quotation mark
+                  %x60 /               ; `  quotation mark
+                  %x5C /               ; \  reverse solidus
+                  %x2F /               ; /  solidus
+                  %x62 /               ; b  backspace  U+0008
+                  %x66 /               ; f  form feed  U+000C
+                  %x6E /               ; n  line feed  U+000A
+                  %x72 /               ; r  carriage return
+                  %x74 /               ; t  tab        U+0009
+                  %x76 /               ; v  vert. tab  U+000B
+                  %x78 2HEXDIG /       ; xXX
+                  %x30-32 2OCTDIG /    ; 0NN  octal, U+0000-U+00FF
+                  %x75 4HEXDIG /       ; uXXXX
+                  %x75 %x7B 1*HEXDIG %x7D /
+                                       ; u{XXXXXX}
+                  %x0A / %x0D /        ; line continuation
+                  %x2028 / %x2029
+
+unescaped       = &lt;any Unicode scalar value other than the
+                   quotation mark that opened this string and
+                   %x5C reverse solidus&gt;
+
+OCTDIG          = %x30-37              ; 0-7
+</pre><a href="#section-8-5" class="pilcrow">¶</a>
+</div>
+<p id="section-8-6">Any character may be escaped.  If the character is in the Basic
+Multilingual Plane (U+0000 through U+FFFF), then it may be represented
+as a six-character sequence: a reverse solidus, followed by the
+lowercase letter u, followed by four hexadecimal digits that encode the
+character's code point.  The hexadecimal letters A through F can be
+upper or lower case.<a href="#section-8-6" class="pilcrow">¶</a></p>
+<p id="section-8-7">A character whose code point is below U+0100 may also be written as
+<code>\x</code> followed by two hexadecimal digits, or as <code>\0</code> followed by two
+octal digits.<a href="#section-8-7" class="pilcrow">¶</a></p>
+<p id="section-8-8">A character at any code point may be written as <code>\u{</code> followed by one
+or more hexadecimal digits and <code>}</code>.<a href="#section-8-8" class="pilcrow">¶</a></p>
+<p id="section-8-9">Alternatively, there are two-character sequence escape representations
+of some popular characters.  So, for example, a string containing only
+a single reverse solidus character may be written as the four
+characters <code>"\\"</code>.<a href="#section-8-9" class="pilcrow">¶</a></p>
+<p id="section-8-10">To escape an extended character that is not in the Basic Multilingual
+Plane using the four-digit form, the character is represented as a
+12-character sequence encoding the UTF-16 surrogate pair.  So, for
+example, a string containing only the G clef character (U+1D11E) may be
+represented as <code>"𝄞"</code>, or equivalently as <code>"\u{1D11E}"</code>.<a href="#section-8-10" class="pilcrow">¶</a></p>
+<p id="section-8-11">An escape sequence that is not listed above is an error.  Note in
+particular that a reverse solidus followed by a decimal digit other
+than <code>0</code>, <code>1</code>, or <code>2</code> is reserved and <span class="bcp14">MUST NOT</span> be generated.<a href="#section-8-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="typed">
+<section id="section-9">
+      <h2 id="name-typed-values">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-typed-values" class="section-name selfRef">Typed Values</a>
+      </h2>
+<p id="section-9-1">A typed value is a value that carries a type tag: an identifier that
+names an application type, immediately followed by the value's
+representation.  A receiver that recognizes the tag may revive the
+value as an instance of that type; a receiver that does not recognize
+the tag <span class="bcp14">MUST</span> still be able to parse the value, and <span class="bcp14">SHOULD</span> make the tag
+and the underlying value available to the application.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-9-2">
+<pre>
+typed-value  = typed-object / typed-array / typed-string
+             / macro-reference
+
+typed-object = identifier begin-object
+               [ member *( value-separator member )
+                 [ value-separator ] ]
+               end-object
+
+typed-array  = identifier begin-array
+               [ element *( value-separator element ) ]
+               end-array
+
+typed-string = identifier ws quoted-string
+</pre><a href="#section-9-2" class="pilcrow">¶</a>
+</div>
+<p id="section-9-3">The <code>ws</code> these three rules admit before the value is permitted only in
+a bounded context.  At the top level it <span class="bcp14">MUST</span> be absent, so that
+<code>open-object</code> and <code>open-array</code> apply and a typed string's quotation
+mark is adjacent to its tag.  See below.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-4">Whether whitespace may separate the tag from the value it carries
+depends on the surrounding context, as described in <a href="#adjacency" class="auto internal xref">Section 3.2.2</a>.<a href="#section-9-4" class="pilcrow">¶</a></p>
+<p id="section-9-5">In a bounded context -- inside an object or an array -- whitespace <span class="bcp14">MAY</span>
+appear between the tag and the <code>{</code>, <code>[</code>, or quotation mark that follows
+it.  The enclosing <code>}</code> or <code>]</code> and the <code>,</code> and <code>:</code> separators already
+mark where each value ends, so nothing is made ambiguous by the gap.
+<code>[ab"cd"]</code> and <code>[ab "cd"]</code> both denote an array of one string, <code>cd</code>,
+tagged <code>ab</code>.<a href="#section-9-5" class="pilcrow">¶</a></p>
+<p id="section-9-6">A comment between the two does not arise as a separate case: it is
+removed before tokenizing (<a href="#ws" class="auto internal xref">Section 3.1</a>), so <code>[ab/*x*/"cd"]</code> is <code>[ab"cd"]</code>
+and the tag is adjacent after all.  This is why the restriction below
+can be stated in terms of whitespace alone.<a href="#section-9-6" class="pilcrow">¶</a></p>
+<p id="section-9-7">In an unbounded context -- the top level of a text or of a stream --
+the tag <span class="bcp14">MUST</span> be adjacent to its value, with no whitespace
+between them.  Nothing there marks where a value ends, so a complete
+value ends at its last character: <code>"abc" {a:1}</code> is two values, and
+<code>"abc"{a:1}</code> is one tagged value.<a href="#section-9-7" class="pilcrow">¶</a></p>
+<p id="section-9-8">A generator <span class="bcp14">SHOULD NOT</span> emit whitespace between a tag and its value in
+either context, since output written that way is valid in only one of
+them.<a href="#section-9-8" class="pilcrow">¶</a></p>
+<p id="section-9-9">A tag is a string (<a href="#identifiers" class="auto internal xref">Section 3.2</a>), so it may be quoted.  Quoting is
+what allows a tag to contain a character that <code>unquoted-string</code> does
+not admit; <code>"o:1"{a:1}</code> is a typed object whose tag is the three-
+character name <code>o:1</code>.  A quoted tag names an application type in
+exactly the same way an unquoted one does, and carries no other
+meaning: the colon in <code>o:1</code> is part of the name, and does not make the
+tag a name/value pair.<a href="#section-9-9" class="pilcrow">¶</a></p>
+<p id="section-9-10">A typed string is exactly two strings: the tag and the value.  A third
+adjacent string matches no rule and is an error.  <code>"a""b"</code> is the
+string <code>b</code> tagged <code>a</code> -- the same construct as <code>color"#333"</code>, with the
+tag quoted -- while <code>"a""b""c"</code> is not a JSOX text.<a href="#section-9-10" class="pilcrow">¶</a></p>
+<p id="section-9-11">Because a quoted string is self-delimiting, a typed string at the top
+level of a text <span class="bcp14">MUST</span> use an unquoted tag; otherwise the tag would be
+read as a complete string value in its own right.  This restriction
+applies only to typed strings, since <code>{</code> and <code>[</code> are unambiguous after
+a closing quotation mark.<a href="#section-9-11" class="pilcrow">¶</a></p>
+<p id="section-9-12">A tag that the receiver has not registered does not make the text
+invalid.  The value is parsed normally and the tag is reported to the
+application; see <a href="#security" class="auto internal xref">Section 14</a>.<a href="#section-9-12" class="pilcrow">¶</a></p>
+<div id="typed-arrays">
+<section id="section-9.1">
+        <h3 id="name-typed-arrays-and-binary-dat">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-typed-arrays-and-binary-dat" class="section-name selfRef">Typed Arrays and Binary Data</a>
+        </h3>
+<p id="section-9.1-1">The following tags are reserved and denote binary data rather than an
+application type.  The content of such an array is a single base 64
+token (<a href="#base64" class="auto internal xref">Section 11</a>), written without quotation marks, that encodes the
+octets of the array.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<span id="name-binary-typed-array-tags"></span><div id="tab-array-types">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-binary-typed-array-tags" class="selfRef">Binary typed-array tags</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Tag</th>
+              <th class="text-left" rowspan="1" colspan="1">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ab</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">untyped octet buffer (ArrayBuffer)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>u8</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned 8-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>cu8</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned 8-bit integers, clamped</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>s8</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">signed 8-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>u16</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned 16-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>s16</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">signed 16-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>u32</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned 32-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>s32</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">signed 32-bit integers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f32</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">IEEE 754 binary32 numbers</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>f64</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">IEEE 754 binary64 numbers</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-9.1-3">The tags <code>u64</code> and <code>s64</code> are reserved for unsigned and signed 64-bit
+integer arrays.  Generators <span class="bcp14">MUST NOT</span> emit them until their
+representation is defined.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.1-4">For all tags other than <code>ab</code>, the encoded octets are the little-endian
+in-memory representation of the array's elements, and the number of
+octets <span class="bcp14">MUST</span> be a multiple of the element size.<a href="#section-9.1-4" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-9.1-5">
+<pre>
+binary-array = array-type open-array [ base64-data ] end-array
+
+array-type   = "ab" / "u8" / "cu8" / "s8" / "u16" / "s16"
+             / "u32" / "s32" / "f32" / "f64"
+</pre><a href="#section-9.1-5" class="pilcrow">¶</a>
+</div>
+<p id="section-9.1-6">These ten tags <span class="bcp14">MUST NOT</span> be used by an application for any other
+purpose.<a href="#section-9.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="references">
+<section id="section-9.2">
+        <h3 id="name-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-references" class="section-name selfRef">References</a>
+        </h3>
+<p id="section-9.2-1">The reserved tag <code>ref</code> denotes a reference to a value that appears
+elsewhere in the same text.  Its content is the path from the root of
+the text to that value: a sequence of member names and array indices.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-9.2-2">
+<pre>
+reference = "ref" open-array
+            [ ref-step *( value-separator ref-step ) ]
+            end-array
+
+ref-step  = string / int
+</pre><a href="#section-9.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-9.2-3">A string step selects an object member by name; an integer step selects
+an array element by position, counting from zero.  An empty path
+denotes the root value of the text.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.2-4">A reference is not a value in its own right: it is replaced, during
+parsing, by the value that its path selects.  A <code>ref</code> array <span class="bcp14">MUST NOT</span> be
+used where the referenced value has not yet been fully determined by
+the text, except that a reference <span class="bcp14">MAY</span> point to an enclosing structure,
+which is how cyclic structures are encoded.<a href="#section-9.2-4" class="pilcrow">¶</a></p>
+<p id="section-9.2-5">References are how JSOX preserves object identity.  Two members whose
+values are the same object are encoded once, with the second member
+carrying a <code>ref</code> to the first.<a href="#section-9.2-5" class="pilcrow">¶</a></p>
+<p id="section-9.2-6">Because a reference names a position in the text, a receiver <span class="bcp14">MUST</span>
+resolve references against the text as received, and <span class="bcp14">MUST NOT</span> resolve
+a path that leaves the text.  See <a href="#security" class="auto internal xref">Section 14</a>.<a href="#section-9.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="macros">
+<section id="section-9.3">
+        <h3 id="name-macros">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-macros" class="section-name selfRef">Macros</a>
+        </h3>
+<p id="section-9.3-1">A macro declares a list of field names once, so that objects of that
+shape can afterwards be written as a list of values.  This removes
+repeated member names from a document; it does not change the value
+that the document denotes.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<div class="lang-abnf sourcecode" id="section-9.3-2">
+<pre>
+macro-definition = identifier open-object
+                   identifier *( value-separator identifier )
+                   end-object
+
+macro-reference  = identifier open-object
+                   [ element *( value-separator element ) ]
+                   end-object
+</pre><a href="#section-9.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-9.3-3">A macro definition is distinguished from a typed object (<a href="#typed" class="auto internal xref">Section 9</a>) by
+what follows the first name inside the braces: if a colon appears
+before the first comma, the construct is a typed object; otherwise it
+is a macro definition.<a href="#section-9.3-3" class="pilcrow">¶</a></p>
+<p id="section-9.3-4">Both halves of that test matter at the top level, where either
+construct may appear.  <code>x{a}</code> declares a macro with the single field
+name <code>a</code>; it is a definition, not a value, so a text containing only
+that is a text with no value and is incomplete.  <code>x{a:1}</code> has a colon
+before the first comma and is therefore a typed object, which is a
+value.  The same applies to a quoted tag: <code>"o:1"{a}</code> is a macro
+definition tagged <code>o:1</code>, and <code>"o:1"{a:1}</code> is a typed object.<a href="#section-9.3-4" class="pilcrow">¶</a></p>
+<p id="section-9.3-5">A macro definition <span class="bcp14">MUST</span> declare at least one name.  Empty braces
+therefore never form a macro definition: <code>x{}</code> is a typed object with
+no members, and it is a value -- an empty object carrying the tag <code>x</code>,
+which a receiver that recognizes <code>x</code> may revive as a default-
+constructed instance of that type.  A zero-name macro could declare
+nothing and could never be referenced, so resolving the ambiguity the
+other way would make <code>x{}</code> useless rather than merely empty.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
+<p id="section-9.3-6">A macro definition <span class="bcp14">MUST</span> appear at the top level of the text, before the
+value that uses it.  It is not itself a value.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
+<p id="section-9.3-7">A macro reference produces an object whose members are the declared
+names paired, in order, with the values supplied.  If fewer values are
+supplied than names were declared, the remaining members are absent, as
+if their value were <code>undefined</code>.  Supplying more values than names were
+declared is an error.<a href="#section-9.3-7" class="pilcrow">¶</a></p>
+<p id="section-9.3-8">A macro tag and a type tag <span class="bcp14">MAY</span> share a name.  When they do, objects
+produced from the macro are also revived as instances of that type.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
+<p id="section-9.3-9">A receiver <span class="bcp14">MUST</span> reject a macro reference whose tag has not been
+defined earlier in the same text.<a href="#section-9.3-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="string-and-character-issues">
+<section id="section-10">
+      <h2 id="name-string-and-character-issues">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-string-and-character-issues" class="section-name selfRef">String and Character Issues</a>
+      </h2>
+<div id="encoding">
+<section id="section-10.1">
+        <h3 id="name-character-encoding">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-character-encoding" class="section-name selfRef">Character Encoding</a>
+        </h3>
+<p id="section-10.1-1">JSOX text exchanged between systems that are not part of a closed
+ecosystem <span class="bcp14">MUST</span> be encoded using UTF-8 <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>.  Implementations <span class="bcp14">MAY</span>
+additionally support UTF-16 and UTF-32; texts encoded in UTF-8 are
+interoperable in the sense that they will be read successfully by the
+maximum number of implementations.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<p id="section-10.1-2">Implementations <span class="bcp14">MUST NOT</span> add a byte order mark to the beginning of a
+JSOX text.  Implementations that parse JSOX texts <span class="bcp14">MUST</span> ignore a byte
+order mark rather than treating it as an error, because U+FEFF is
+whitespace in JSOX (<a href="#ws" class="auto internal xref">Section 3.1</a>).<a href="#section-10.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="unicode-characters">
+<section id="section-10.2">
+        <h3 id="name-unicode-characters">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-unicode-characters" class="section-name selfRef">Unicode Characters</a>
+        </h3>
+<p id="section-10.2-1">When all the strings represented in a JSOX text are composed entirely
+of Unicode characters <span>[<a href="#UNICODE" class="cite xref">UNICODE</a>]</span> (however escaped), then that JSOX
+text is interoperable in the sense that all software implementations
+that parse it will agree on the contents of names and of string values
+in objects and arrays.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">However, the ABNF in this specification allows member names and string
+values to contain bit sequences that cannot encode Unicode characters;
+for example, <code>"\uDEAD"</code> (a single unpaired UTF-16 surrogate).
+Instances of this have been observed, for example, when a library
+truncates a UTF-16 string without checking whether the truncation split
+a surrogate pair.  The behavior of software that receives JSOX texts
+containing such values is unpredictable; for example, implementations
+might return different values for the length of a string value or even
+suffer fatal runtime exceptions.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="string-comparison">
+<section id="section-10.3">
+        <h3 id="name-string-comparison">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-string-comparison" class="section-name selfRef">String Comparison</a>
+        </h3>
+<p id="section-10.3-1">Software implementations are typically required to test names of object
+members for equality.  Implementations that transform the textual
+representation into sequences of Unicode code units and then perform
+the comparison numerically, code unit by code unit, are interoperable
+in the sense that implementations will agree in all cases on equality
+or inequality of two strings.  For example, implementations that
+compare strings with escaped characters unconverted may incorrectly
+find that two spellings of the same string are not equal.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.3-2">Note that this applies to unquoted identifiers as well as to quoted
+strings, and that an identifier containing U+00A0 is not equal to the
+visually identical identifier containing U+0020 (<a href="#ws" class="auto internal xref">Section 3.1</a>).<a href="#section-10.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="base64">
+<section id="section-11">
+      <h2 id="name-base-64-encoding">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-base-64-encoding" class="section-name selfRef">Base 64 Encoding</a>
+      </h2>
+<p id="section-11-1">The binary typed arrays of <a href="#typed-arrays" class="auto internal xref">Section 9.1</a> carry their octets as base
+64 data.  JSOX uses the alphabet below rather than the alphabets of
+<span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span>, because the two characters it selects for values 62 and 63
+are permitted in an unquoted identifier and so require no quoting:<a href="#section-11-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11-2">
+<pre>
+ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$_
+</pre><a href="#section-11-2" class="pilcrow">¶</a>
+</div>
+<p id="section-11-3">Generators <span class="bcp14">MUST</span> use this alphabet.<a href="#section-11-3" class="pilcrow">¶</a></p>
+<p id="section-11-4">For interoperability with data produced by other base 64
+implementations, parsers <span class="bcp14">MUST</span> additionally accept the following
+characters on input:<a href="#section-11-4" class="pilcrow">¶</a></p>
+<span id="name-base-64-characters-accepted"></span><div id="tab-base64">
+<table class="center" id="table-2">
+        <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-base-64-characters-accepted" class="selfRef">Base 64 characters accepted on input</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Character</th>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>$</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">62</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>+</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">62</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>-</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">62</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>.</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">62</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>_</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">63</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>/</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">63</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>,</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">63</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>=</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">end of data</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>~</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">end of data</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-11-6">Note that <code>+</code>, <code>-</code>, <code>.</code>, <code>/</code>, and <code>,</code> require quoting when they appear
+in a value that is otherwise an unquoted identifier, and that <code>,</code> and
+<code>/</code> are ambiguous inside an array; a parser reading base 64 data
+between <code>[</code> and <code>]</code> reads to the closing bracket and so is not affected,
+but a generator <span class="bcp14">MUST NOT</span> emit these characters.<a href="#section-11-6" class="pilcrow">¶</a></p>
+<p id="section-11-7">Padding is not required.  A <code>=</code> or <code>~</code> character terminates the data.
+Trailing bits that do not complete an octet <span class="bcp14">MUST</span> be zero and <span class="bcp14">MUST</span> be
+discarded.<a href="#section-11-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="parsers">
+<section id="section-12">
+      <h2 id="name-parsers">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-parsers" class="section-name selfRef">Parsers</a>
+      </h2>
+<p id="section-12-1">A JSOX parser transforms a JSOX text into another representation.  A
+JSOX parser <span class="bcp14">MUST</span> accept all texts that conform to the JSOX grammar.  A
+JSOX parser <span class="bcp14">MAY</span> accept non-JSOX forms or extensions.<a href="#section-12-1" class="pilcrow">¶</a></p>
+<p id="section-12-2">An implementation may set limits on the size of texts that it accepts,
+on the maximum depth of nesting, on the range and precision of numbers,
+on the length and character contents of strings, and on the number of
+macro and type tags it will track.  See <a href="#security" class="auto internal xref">Section 14</a>.<a href="#section-12-2" class="pilcrow">¶</a></p>
+<div id="streams">
+<section id="section-12.1">
+        <h3 id="name-streams">
+<a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-streams" class="section-name selfRef">Streams</a>
+        </h3>
+<p id="section-12.1-1">A JSOX text is a single value, but a sequence of JSOX texts may be
+concatenated to form a stream, and an implementation <span class="bcp14">MAY</span> provide an
+interface that reports each value as it completes.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
+<p id="section-12.1-2">Within a stream, whitespace between values is significant wherever the
+two values would otherwise be read as one token.  The stream <code>1 2 3</code>
+is three numbers; without the separating whitespace it would be one.
+Values that end with a structural character or a quotation mark are
+self-delimiting and need no separator.<a href="#section-12.1-2" class="pilcrow">¶</a></p>
+<p id="section-12.1-3">A number, an unquoted identifier, or a literal name at the end of the
+available input cannot be known to be complete, because more characters
+may follow in a later portion of the stream.  An implementation <span class="bcp14">MUST NOT</span> report such a value until either a delimiter has been seen or the
+application has declared the input to be complete.<a href="#section-12.1-3" class="pilcrow">¶</a></p>
+<p id="section-12.1-4">Macro and type definitions are scoped to the stream, not to the
+individual value: a definition made in one value of a stream remains in
+effect for later values.<a href="#section-12.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="generators">
+<section id="section-13">
+      <h2 id="name-generators">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-generators" class="section-name selfRef">Generators</a>
+      </h2>
+<p id="section-13-1">A JSOX generator produces JSOX text.  The resulting text <span class="bcp14">MUST</span> strictly
+conform to the JSOX grammar.<a href="#section-13-1" class="pilcrow">¶</a></p>
+<p id="section-13-2">A generator that is asked to produce a value that has no JSOX
+representation, such as a function, <span class="bcp14">MUST</span> either omit it or report an
+error, and <span class="bcp14">MUST NOT</span> emit an approximation that would parse as a
+different value.<a href="#section-13-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security">
+<section id="section-14">
+      <h2 id="name-security-considerations">
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-14-1">Generally, there are security issues with scripting languages.  JSOX is
+a subset of ECMAScript that excludes code expressions, so a JSOX text
+cannot by itself cause code to run.<a href="#section-14-1" class="pilcrow">¶</a></p>
+<p id="section-14-2">However, JSOX's syntax deviates from ECMAScript for type tags, macro
+definitions, and references.  It is therefore not generally possible to
+use a scripting language's <code>eval()</code> function to parse a JSOX text, and
+implementations <span class="bcp14">MUST NOT</span> do so.  A subset of JSOX texts -- those that
+use no type tag, macro, reference, date, or binary array -- would be
+accepted by <code>eval()</code>, but an implementation cannot know that a text is
+in that subset without first parsing it.  Using <code>eval()</code> on data from
+an untrusted source allows arbitrary code execution.<a href="#section-14-2" class="pilcrow">¶</a></p>
+<p id="section-14-3">Reviving application types from a type tag is a deserialization
+primitive, and carries the risks common to such primitives.  A receiver
+<span class="bcp14">MUST NOT</span> construct an arbitrary type named by an incoming tag.  It
+<span class="bcp14">SHOULD</span> revive only types that the application has explicitly
+registered, and it <span class="bcp14">MUST</span> treat the values supplied for a revived type as
+untrusted input, validating them exactly as it would validate the same
+values arriving in a plain object.  A tag that has not been registered
+<span class="bcp14">MUST NOT</span> cause any application code to run.<a href="#section-14-3" class="pilcrow">¶</a></p>
+<p id="section-14-4">References (<a href="#references" class="auto internal xref">Section 9.2</a>) let a text name values elsewhere in itself.
+Two hazards follow.  First, a reference can create a cyclic structure;
+software that walks a parsed JSOX value without tracking which objects
+it has already visited will not terminate.  Receivers that pass parsed
+values to code expecting a tree -- including code that re-serializes
+them -- <span class="bcp14">MUST</span> detect cycles.  Second, a small text can name the same
+large substructure many times, so the size of the parsed value is not
+bounded by the size of the text.  Implementations <span class="bcp14">SHOULD</span> bound the
+number of references they will resolve.<a href="#section-14-4" class="pilcrow">¶</a></p>
+<p id="section-14-5">Macros (<a href="#macros" class="auto internal xref">Section 9.3</a>) and type tags accumulate state for the lifetime of
+a stream.  An attacker who can write to a long-lived stream can define
+tags without limit.  Implementations <span class="bcp14">SHOULD</span> bound the number of
+definitions they will retain.<a href="#section-14-5" class="pilcrow">¶</a></p>
+<p id="section-14-6">Binary typed arrays (<a href="#typed-arrays" class="auto internal xref">Section 9.1</a>) allow a text to request an
+allocation whose size is proportional to the length of the base 64
+data.  This is a bounded expansion, but implementations <span class="bcp14">SHOULD</span> still
+apply a limit on allocation size.<a href="#section-14-6" class="pilcrow">¶</a></p>
+<p id="section-14-7">Arbitrary-precision integers are unbounded in length.  Implementations
+<span class="bcp14">SHOULD</span> limit the length of such a number, since arithmetic on very
+large integers can consume disproportionate time.<a href="#section-14-7" class="pilcrow">¶</a></p>
+<p id="section-14-8">Because JSOX permits comments and several equivalent spellings of the
+same value -- three quotation marks, several escape forms, several
+number bases, underscores in numbers, macros -- two texts that denote
+the same value may differ.  JSOX is therefore not suitable as-is for
+applications that require a canonical form, such as computing a
+signature over serialized data.  Such applications <span class="bcp14">MUST</span> define their
+own canonicalization, or sign the octets received rather than a
+re-serialization of them.<a href="#section-14-8" class="pilcrow">¶</a></p>
+<p id="section-14-9">Implementations <span class="bcp14">SHOULD</span> apply limits on nesting depth, text size, string
+length, and number magnitude.  A parser that recurses per level of
+nesting can be made to exhaust its stack by a text consisting only of
+open brackets.<a href="#section-14-9" class="pilcrow">¶</a></p>
+<p id="section-14-10">A stream of JSON or JSOX texts may generate the sequence <code>][</code> where two
+adjacent array values meet.  Software that scans for such sequences
+must not treat them as significant.<a href="#section-14-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana">
+<section id="section-15">
+      <h2 id="name-iana-considerations">
+<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-15-1">IANA is requested to register the media type "application/jsox" in the
+"Media Types" registry, using the template below and following the
+procedures of <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>.<a href="#section-15-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-15-2">
+        <dt id="section-15-2.1">Type name:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.2">
+          <p id="section-15-2.2.1">application<a href="#section-15-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.3">Subtype name:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.4">
+          <p id="section-15-2.4.1">jsox<a href="#section-15-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.5">Required parameters:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.6">
+          <p id="section-15-2.6.1">N/A<a href="#section-15-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.7">Optional parameters:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.8">
+          <p id="section-15-2.8.1">N/A.  No "charset" parameter is defined for this registration.
+Adding one has no effect on compliant recipients; see
+<a href="#encoding" class="auto internal xref">Section 10.1</a>.<a href="#section-15-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.9">Encoding considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.10">
+          <p id="section-15-2.10.1">binary<a href="#section-15-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.11">Security considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.12">
+          <p id="section-15-2.12.1">See <a href="#security" class="auto internal xref">Section 14</a> of RFC XXXX.<a href="#section-15-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.13">Interoperability considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.14">
+          <p id="section-15-2.14.1">See <a href="#intro" class="auto internal xref">Section 1</a>, <a href="#numbers" class="auto internal xref">Section 7</a>, and <a href="#encoding" class="auto internal xref">Section 10.1</a> of RFC XXXX.<a href="#section-15-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.15">Published specification:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.16">
+          <p id="section-15-2.16.1">RFC XXXX<a href="#section-15-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.17">Applications that use this media type:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.18">
+          <p id="section-15-2.18.1">JSOX has been used to exchange data between applications written in
+C, C++, and JavaScript.<a href="#section-15-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.19">Fragment identifier considerations:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.20">
+          <p id="section-15-2.20.1">N/A<a href="#section-15-2.20.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.21">Additional information:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.22">
+          <p id="section-15-2.22.1">Deprecated alias names for this type: N/A<a href="#section-15-2.22.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.23"></dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.24">
+          <p id="section-15-2.24.1">Magic number(s): N/A<a href="#section-15-2.24.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.25"></dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.26">
+          <p id="section-15-2.26.1">File extension(s): .jsox<a href="#section-15-2.26.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.27"></dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.28">
+          <p id="section-15-2.28.1">Macintosh file type code(s): TEXT<a href="#section-15-2.28.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.29">Person &amp; email address to contact for further information:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.30">
+          <p id="section-15-2.30.1">James Buckeyne <a href="mailto:james.buckeyne@gmail.com">james.buckeyne@gmail.com</a><a href="#section-15-2.30.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.31">Intended usage:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.32">
+          <p id="section-15-2.32.1">COMMON<a href="#section-15-2.32.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.33">Restrictions on usage:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.34">
+          <p id="section-15-2.34.1">None<a href="#section-15-2.34.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.35">Author:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.36">
+          <p id="section-15-2.36.1">James Buckeyne <a href="mailto:james.buckeyne@gmail.com">james.buckeyne@gmail.com</a><a href="#section-15-2.36.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-15-2.37">Change controller:</dt>
+        <dd style="margin-left: 1.5em" id="section-15-2.38">
+          <p id="section-15-2.38.1">James Buckeyne <a href="mailto:james.buckeyne@gmail.com">james.buckeyne@gmail.com</a><a href="#section-15-2.38.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-15-3">RFC Editor: please replace XXXX above with the RFC number assigned to
+this document, and remove this paragraph.<a href="#section-15-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="examples">
+<section id="section-16">
+      <h2 id="name-examples">
+<a href="#section-16" class="section-number selfRef">16. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+      </h2>
+<p id="section-16-1">This is a JSOX object, and also a JSON object:<a href="#section-16-1" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-16-2">
+<pre>
+{
+  "Image": {
+    "Width":  800,
+    "Height": 600,
+    "Title":  "View from 15th Floor",
+    "Thumbnail": {
+      "Url":    "http://www.example.com/image/481989943",
+      "Height": 125,
+      "Width":  100
+    },
+    "Animated": false,
+    "IDs": [116, 943, 234, 38793]
+  }
+}
+</pre><a href="#section-16-2" class="pilcrow">¶</a>
+</div>
+<p id="section-16-3">Its Image member is an object whose Thumbnail member is an object and
+whose IDs member is an array of numbers.<a href="#section-16-3" class="pilcrow">¶</a></p>
+<p id="section-16-4">This is a JSOX array containing two objects.  It uses unquoted member
+names, dates, arbitrary-precision integers, binary arrays, and both
+comment forms:<a href="#section-16-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-16-5">
+<pre>
+[
+  {
+     "precision": "zip",
+     "ident":     123594985n,
+     "Latitude":  37.7668,
+     "Longitude": -122.3959,
+     created:     2018-09-11T03:43:53.345-07:00,
+     binary:      u8[U2VjcmV0],   /* Secret */
+     Address:     "",
+     City:        "SAN FRANCISCO",
+     State:       "CA",
+     Zip:         "94107",
+     Country:     "US"
+  },
+  {
+     precision:   "zip",
+     "ident":     123594986n,
+     Latitude:    37.371991,
+     "Longitude": -122.026020,
+     created:     2018-09-11T10:43:52.437Z,
+     "binary":    u8[SGVsbG8sIFdvcmxkIQ],   // Hello, World!
+     "Address":   "",
+     City:        "SUNNYVALE",
+     "State":     "CA",
+     Zip:         "94085",
+     "Country":   "US"
+  }
+]
+</pre><a href="#section-16-5" class="pilcrow">¶</a>
+</div>
+<p id="section-16-6">The same data, using a macro to declare the member names once:<a href="#section-16-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-16-7">
+<pre>
+locale{ precision,ident,Latitude,Longitude,
+        created,binary,Address,City,State,Zip,Country}
+[ locale{ "zip",123594985n,37.7668,-122.3959,
+          2018-09-11T03:43:53.345-07:00,
+          u8[U2VjcmV0],
+          "","SAN FRANCISCO","CA","94107","US"},
+  locale{ "zip",123594986n,37.371991,-122.026020,
+          2018-09-11T10:43:52.437Z,
+          u8[SGVsbG8sIFdvcmxkIQ],
+          "","SUNNYVALE","CA","94085","US"}
+]
+</pre><a href="#section-16-7" class="pilcrow">¶</a>
+</div>
+<p id="section-16-8">Once defined, the macro remains in effect for later values in the same
+stream:<a href="#section-16-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-16-9">
+<pre>
+locale{ "zip",123594988n,36.1699,-115.1398,
+        2018-09-11T13:23:23.636Z,
+        u8[SGVsbG8sIFdvcmxkIQ],
+        "","LAS VEGAS","NV","89109","US"}
+</pre><a href="#section-16-9" class="pilcrow">¶</a>
+</div>
+<p id="section-16-10">This is an example of a reference.  The manager member and the first
+element of the employees array denote the same object:<a href="#section-16-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-16-11">
+<pre>
+{
+   company: { name: "Example.com",
+              employees: [ { name:"bob" }, { name:"tom" } ],
+              manager: ref["company","employees",0]
+            }
+}
+</pre><a href="#section-16-11" class="pilcrow">¶</a>
+</div>
+<p id="section-16-12">Here are several small JSOX texts containing only values:<a href="#section-16-12" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-16-13">
+<pre>
+"Hello world!"
+42
+123n
+true
+Infinity
+2018-09-11T13:23:23.636Z
+</pre><a href="#section-16-13" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-17">
+      <h2 id="name-references-2">
+<a href="#section-17" class="section-number selfRef">17. </a><a href="#name-references-2" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-17.1">
+        <h3 id="name-normative-references">
+<a href="#section-17.1" class="section-number selfRef">17.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="ECMA-262">[ECMA-262]</dt>
+        <dd>
+<span class="refAuthor">Ecma International</span>, <span class="refTitle">"ECMAScript Language Specification"</span>, <span class="seriesInfo">ECMA Standard ECMA-262, 15th Edition</span>, <time datetime="2024-06" class="refDate">June 2024</time>, <span>&lt;<a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-262/">https://www.ecma-international.org/publications-and-standards/standards/ecma-262/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISO8601">[ISO8601]</dt>
+        <dd>
+<span class="refAuthor">International Organization for Standardization</span>, <span class="refTitle">"Date and time -- Representations for information interchange"</span>, <span class="seriesInfo">ISO 8601-1:2019</span>, <time datetime="2019" class="refDate">2019</time>, <span>&lt;<a href="https://www.iso.org/standard/70907.html">https://www.iso.org/standard/70907.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5234">[RFC5234]</dt>
+        <dd>
+<span class="refAuthor">Crocker, D., Ed.</span> and <span class="refAuthor">P. Overell</span>, <span class="refTitle">"Augmented BNF for Syntax Specifications: ABNF"</span>, <span class="seriesInfo">STD 68</span>, <span class="seriesInfo">RFC 5234</span>, <span class="seriesInfo">DOI 10.17487/RFC5234</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5234">https://www.rfc-editor.org/rfc/rfc5234</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6838">[RFC6838]</dt>
+        <dd>
+<span class="refAuthor">Freed, N.</span>, <span class="refAuthor">Klensin, J.</span>, and <span class="refAuthor">T. Hansen</span>, <span class="refTitle">"Media Type Specifications and Registration Procedures"</span>, <span class="seriesInfo">BCP 13</span>, <span class="seriesInfo">RFC 6838</span>, <span class="seriesInfo">DOI 10.17487/RFC6838</span>, <time datetime="2013-01" class="refDate">January 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6838">https://www.rfc-editor.org/rfc/rfc6838</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8259">[RFC8259]</dt>
+        <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="UNICODE">[UNICODE]</dt>
+      <dd>
+<span class="refAuthor">The Unicode Consortium</span>, <span class="refTitle">"The Unicode Standard"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.unicode.org/versions/latest/">https://www.unicode.org/versions/latest/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-17.2">
+        <h3 id="name-informative-references">
+<a href="#section-17.2" class="section-number selfRef">17.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="IEEE754">[IEEE754]</dt>
+        <dd>
+<span class="refAuthor">IEEE</span>, <span class="refTitle">"IEEE Standard for Floating-Point Arithmetic"</span>, <span class="seriesInfo">IEEE Standard 754-2019</span>, <time datetime="2019" class="refDate">2019</time>, <span>&lt;<a href="https://standards.ieee.org/standard/754-2019.html">https://standards.ieee.org/standard/754-2019.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSON5">[JSON5]</dt>
+        <dd>
+<span class="refTitle">"JSON5 Data Interchange Format"</span>, <span>n.d.</span>, <span>&lt;<a href="https://json5.org/">https://json5.org/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSON6">[JSON6]</dt>
+        <dd>
+<span class="refTitle">"JSON6 Data Interchange Format"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/d3x0r/JSON6">https://github.com/d3x0r/JSON6</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="JSOX-IMPL">[JSOX-IMPL]</dt>
+        <dd>
+<span class="refAuthor">Buckeyne, J.</span>, <span class="refTitle">"JSOX reference implementation"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/d3x0r/jsox">https://github.com/d3x0r/jsox</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4627">[RFC4627]</dt>
+        <dd>
+<span class="refAuthor">Crockford, D.</span>, <span class="refTitle">"The application/json Media Type for JavaScript Object Notation (JSON)"</span>, <span class="seriesInfo">RFC 4627</span>, <span class="seriesInfo">DOI 10.17487/RFC4627</span>, <time datetime="2006-07" class="refDate">July 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4627">https://www.rfc-editor.org/rfc/rfc4627</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4648">[RFC4648]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7493">[RFC7493]</dt>
+      <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The I-JSON Message Format"</span>, <span class="seriesInfo">RFC 7493</span>, <span class="seriesInfo">DOI 10.17487/RFC7493</span>, <time datetime="2015-03" class="refDate">March 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7493">https://www.rfc-editor.org/rfc/rfc7493</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="changes">
+<section id="appendix-A">
+      <h2 id="name-changes-from-json">
+<a href="#name-changes-from-json" class="section-name selfRef">Changes from JSON</a>
+      </h2>
+<p id="appendix-A-1">This appendix summarizes, without normative force, how JSOX differs
+from JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>.  Every one of these constructs is optional; a
+JSOX text that uses none of them is a JSON text.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Additions taken from JSON5 <span>[<a href="#JSON5" class="cite xref">JSON5</a>]</span> and JSON6 <span>[<a href="#JSON6" class="cite xref">JSON6</a>]</span>:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-3.1">
+          <p id="appendix-A-3.1.1">Object member names may be unquoted (<a href="#identifiers" class="auto internal xref">Section 3.2</a>).<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.2">
+          <p id="appendix-A-3.2.1">Strings may be quoted with <code>'</code> or <code>`</code> as well as <code>"</code>, may span
+lines, and accept the full set of ECMAScript escapes (<a href="#strings" class="auto internal xref">Section 8</a>).<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.3">
+          <p id="appendix-A-3.3.1">Numbers may be hexadecimal, octal, or binary; may have leading zeros,
+a leading or trailing decimal point, a leading plus sign, or
+underscore separators; and may be <code>NaN</code> or <code>Infinity</code>
+(<a href="#numbers" class="auto internal xref">Section 7</a>).<a href="#appendix-A-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.4">
+          <p id="appendix-A-3.4.1">Objects and arrays may have a trailing comma, and arrays may have
+elisions (<a href="#objects" class="auto internal xref">Section 5</a>, <a href="#arrays" class="auto internal xref">Section 6</a>).<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.5">
+          <p id="appendix-A-3.5.1"><code>undefined</code> is a literal name (<a href="#values" class="auto internal xref">Section 4</a>).<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.6">
+          <p id="appendix-A-3.6.1">Line and block comments are removed before tokenizing (<a href="#ws" class="auto internal xref">Section 3.1</a>).<a href="#appendix-A-3.6.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-4">Additions specific to JSOX:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-5.1">
+          <p id="appendix-A-5.1.1">Dates are written unquoted, as a form of number (<a href="#dates" class="auto internal xref">Section 7.2</a>).<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.2">
+          <p id="appendix-A-5.2.1">Arbitrary-precision integers are written with an <code>n</code> suffix
+(<a href="#numbers" class="auto internal xref">Section 7</a>).<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.3">
+          <p id="appendix-A-5.3.1">Binary buffers and typed arrays are written as base 64 data carried
+by a reserved tag (<a href="#typed-arrays" class="auto internal xref">Section 9.1</a>).<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.4">
+          <p id="appendix-A-5.4.1">Objects, arrays, and strings may carry a type tag so that a receiver
+can revive an application type (<a href="#typed" class="auto internal xref">Section 9</a>).<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.5">
+          <p id="appendix-A-5.5.1">Macros declare a set of member names once and then carry only values
+(<a href="#macros" class="auto internal xref">Section 9.3</a>).<a href="#appendix-A-5.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.6">
+          <p id="appendix-A-5.6.1">References allow shared and cyclic structures to be encoded
+(<a href="#references" class="auto internal xref">Section 9.2</a>).<a href="#appendix-A-5.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.7">
+          <p id="appendix-A-5.7.1"><code>#</code> introduces a line comment (<a href="#ws" class="auto internal xref">Section 3.1</a>).<a href="#appendix-A-5.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.8">
+          <p id="appendix-A-5.8.1">A string may be unquoted in value position as well as in a member
+name (<a href="#identifiers" class="auto internal xref">Section 3.2</a>).<a href="#appendix-A-5.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-6">One earlier JSOX behavior has been withdrawn: a leading zero once
+selected octal, as it does in C.  That reading is deprecated, and a
+leading zero now denotes a decimal number.  Octal is written with the
+<code>0o</code> prefix (<a href="#numbers" class="auto internal xref">Section 7</a>).<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-B-1">RFC 4627 <span>[<a href="#RFC4627" class="cite xref">RFC4627</a>]</span> was written by Douglas Crockford, and was revised
+as RFC 7159 and then RFC 8259 <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> by Tim Bray.  This document
+reuses a substantial amount of text from those documents, particularly
+in the descriptions of objects, arrays, numbers, strings, and character
+encoding.  The debt is gratefully acknowledged.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The relaxations of JSON's punctuation, string, and number syntax
+adopted here were developed by the JSON5 <span>[<a href="#JSON5" class="cite xref">JSON5</a>]</span> and JSON6
+<span>[<a href="#JSON6" class="cite xref">JSON6</a>]</span> communities.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">James Buckeyne</span></div>
+<div dir="auto" class="left"><span class="org">Independent</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:james.buckeyne@gmail.com" class="email">james.buckeyne@gmail.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
