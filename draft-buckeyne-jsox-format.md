@@ -597,6 +597,21 @@ Unlike JSON, leading zeros are permitted in a decimal number and do not
 change its value: `0123` denotes 123.  A base other than 10 MUST be
 selected with an explicit radix prefix.
 
+This follows from treating JSOX as a data format rather than as source
+code.  The convention that a leading zero selects octal belongs to the
+lexers of programming languages such as C.  Routines that convert text
+to a number, which is what a parser of a data format is, uniformly
+read a leading zero as an ordinary decimal digit: `Number("0123")` and
+`parseInt("0123", 10)` in ECMAScript, `strtol(s, 0, 10)` and
+`strtod()` in C, and `int("0123")` in Python all yield 123.  JSOX
+therefore has a single rule for numeric tokens: a token denotes the
+value the ECMAScript `Number()` constructor gives it.  `Number()`
+accepts the `0x`, `0o`, and `0b` prefixes and has never accepted a bare
+leading zero as octal.  The only departures from that rule in this
+document are the readability extensions defined here: the underscore
+separator, a bare leading or trailing decimal point, the `n` suffix,
+and dates.
+
 Earlier descriptions of JSOX followed C in reading a leading zero as
 selecting octal, so that `0123` denoted 83.  That reading is
 deprecated.  Implementations MUST NOT interpret a leading zero as
